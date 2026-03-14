@@ -1,0 +1,31 @@
+#text files
+*.txt
+#log files
+*.log
+#csv files
+*.csv
+#json files
+*.json
+#xml files
+*.xml
+#yaml files
+*.yaml
+#ini files
+*.ini
+#env files
+*.env
+#backup files
+*.bak
+#temporary files
+*.tmp
+#cache files
+*.cache
+#compiled files
+*.pyc
+*.class
+#virtual environment
+venv/
+#database files
+*.db
+#pdf file
+*.pdf
