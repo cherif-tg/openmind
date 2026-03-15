@@ -10,11 +10,7 @@ from config import (
 from typing import List
 from langchain_core.documents import Document
 
-strategy_list = {
-    "recursive": RecursiveCharacterTextSplitter,
-    "character": CharacterTextSplitter,
-    "token" : TokenTextSplitter
-}
+
 
 def chunk_documents(docs:List[Document],strategy ="recursive",chunk_size=CHUNK_SIZE,chunk_overlap=CHUNK_OVERLAP) -> List[Document]:
     """Divise les documents fournit en morceaux de taille prédefini selon la strategie choisit
@@ -27,27 +23,39 @@ def chunk_documents(docs:List[Document],strategy ="recursive",chunk_size=CHUNK_S
 
     Raises:
         ValueError: La strategy choisit n'est pas prise en charge
-        FileNotFoundError: le document fourni est vide 
+        ValueError: le document fourni est vide 
 
     Returns:
         List[Document]: les chunks sous forme de liste de documents langchain
     """
+    strategy_list = {
+    "recursive": RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        separators=["\n\n", "\n", "."," ", ""]
+        ),
+    "character": CharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+    ),
+    "token" : TokenTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+    )
+    }
     
     if strategy not in strategy_list.keys():
         raise ValueError("La strategy choisi n'est pas supporter")  
     splitter =strategy_list[strategy]
-    splitter=splitter(
-        chunk_size,
-        chunk_overlap,
-    )
-    chunks=splitter.split_document(docs)
+    splitter=splitter
+    chunks=splitter.split_documents(docs)
     if len(chunks) == 0:
-        raise FileNotFoundError("Le document fournis est vide..")
+        raise ValueError("Le document fournis est vide..")
     
     for i,doc in enumerate(chunks):
         doc.metadata['index'] = i
         doc.metadata['strategy'] =  strategy
-        doc.metadata['len'] = len(doc.page_content)
+        doc.metadata['chunk_size'] = len(doc.page_content)
     print(f"({len(docs)}) on été transformés en ({len(chunks)}) chunks.")
     
     return chunks
