@@ -8,7 +8,7 @@ from config import (
 from dotenv import load_dotenv
 load_dotenv()
 
-def get_embedded():
+def get_embeddings():
     """retourne le modele d'embeddings courant
 
     Returns:
@@ -20,19 +20,13 @@ def get_embedded():
     )
     return modele
 
-def embedded_document(chunks:List[Document]):
+def embed_document(chunks:List[Document]):
     """Prend un list de chunk langchain et retourne les vecteurs stockées dans un vectorstore
 
     Args:
         chunks (List[Document]): List dedocuments langchain
     """
-    modele=get_embedded()
-    chroma = Chroma(
-        collection_name=COLLECTION_NAME,
-        embedding_function=modele,
-        persist_directory=VECTORSTORE_PATH
-    )
-    
+    modele=get_embeddings()
     vector_store=Chroma.from_documents(chunks,embedding=modele,
                                        collection_name=COLLECTION_NAME,persist_directory=VECTORSTORE_PATH)
     
