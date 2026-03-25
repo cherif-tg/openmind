@@ -1,9 +1,7 @@
 from langchain.prompts import PromptTemplate
-from langchain.chains import retrieval_qa
 from app.retriever import get_retriever
+from langchain.chains.retrieval_qa import RetrievalQA
 from app.llm_factory import get_llm
-from langchain_core.documents import Document
-from typing import List
 
 def build_rag_chain(question:str):
     llm = get_llm()
@@ -11,13 +9,18 @@ def build_rag_chain(question:str):
     retriver =  get_retriever()
     context=retriver.invoke(question)
     
-    prompt=f"""Tu es un assistant , tu ne doit répondre aux questions en te basant uniquement sur les documents fournis.Si tu n'a pas la reponse dis juste:"Je n'ai pas assez d'information pour repondre a la question."
-    Documents:
-    {context}
-    Question:
-    {question}
-    Tu dois donner retourner la reponse a la question en plus de la source d'ou proviens la réponse
-    """
-    reponse=llm.invoke(prompt)
-    return reponse
+    prompt=PromptTemplate(
+        template="Tu es un assistant de recherche. Utilise les informations suivantes pour répondre à la question: {context} Question: {question}",
+        input_variables=["context", "question"]
+    )
+    chains=RetrievalQA.from_chain_type(llm=llm,
+                                       retriever=retriver,
+                                       chain_type="stuff",
+                                       chains_type_kwargs={"prompt": prompt},
+                                       return_source_documents=True
+ )
+    result=chains.invoke({"query": question})
+    reponse=result['result']
+    sources=result['source_documents']
+    return reponse, sources
     
