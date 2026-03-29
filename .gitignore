@@ -29,3 +29,8 @@ venv/
 *.db
 #pdf file
 *.pdf
+
+#vectore file
+*.bin
+*.sqlite3
+vectorstore/
