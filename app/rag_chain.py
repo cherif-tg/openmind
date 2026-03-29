@@ -1,26 +1,37 @@
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 from app.retriever import get_retriever
-from langchain.chains.retrieval_qa import RetrievalQA
 from app.llm_factory import get_llm
 
-def build_rag_chain(question:str):
+def build_rag_chain(question: str):
+    """Construit et exécute la chaîne RAG complète"""
     llm = get_llm()
+    retriever = get_retriever()
     
-    retriver =  get_retriever()
-    context=retriver.invoke(question)
+    # Récupérer les documents pertinents
+    relevant_docs = retriever.invoke(question)
     
-    prompt=PromptTemplate(
-        template="Tu es un assistant de recherche. Utilise les informations suivantes pour répondre à la question: {context} Question: {question}",
+    # Formater le contexte
+    context = "\n\n".join([doc.page_content for doc in relevant_docs])
+    
+    # Créer le prompt
+    prompt = PromptTemplate(
+        template="""Tu es un assistant de recherche expert. Utilise UNIQUEMENT les informations suivantes pour répondre à la question de manière précise et concise.
+
+Contexte:
+{context}
+
+Question: {question}
+
+Réponse:""",
         input_variables=["context", "question"]
     )
-    chains=RetrievalQA.from_chain_type(llm=llm,
-                                       retriever=retriver,
-                                       chain_type="stuff",
-                                       chains_type_kwargs={"prompt": prompt},
-                                       return_source_documents=True
- )
-    result=chains.invoke({"query": question})
-    reponse=result['result']
-    sources=result['source_documents']
-    return reponse, sources
+    
+    # Créer la chaîne RAG
+    chain = prompt | llm | StrOutputParser()
+    
+    # Invoquer la chaîne
+    response = chain.invoke({"context": context, "question": question})
+    
+    return response, relevant_docs
     
