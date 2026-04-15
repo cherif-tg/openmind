@@ -34,3 +34,8 @@ CHUNK_OVERLAP     = 50
 
 # ── Retrieval ─────────────────────────────────────────────
 TOP_K             = 5
+
+# ── API Backend ───────────────────────────────────────────
+API_HOST          = os.getenv("API_HOST", "localhost")
+API_PORT          = int(os.getenv("API_PORT", "8000"))
+STREAMLIT_API_BASE_URL = os.getenv("STREAMLIT_API_BASE_URL", "http://localhost:8000")

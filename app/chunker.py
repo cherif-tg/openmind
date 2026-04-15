@@ -47,7 +47,6 @@ def chunk_documents(docs:List[Document],strategy ="recursive",chunk_size=CHUNK_S
     if strategy not in strategy_list.keys():
         raise ValueError("La strategy choisi n'est pas supporter")  
     splitter =strategy_list[strategy]
-    splitter=splitter
     chunks=splitter.split_documents(docs)
     if len(chunks) == 0:
         raise ValueError("Le document fournis est vide..")

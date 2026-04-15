@@ -18,7 +18,7 @@ LOADER_MAP = {
     ".csv":  CSVLoader,
     ".docx": Docx2txtLoader,
     ".txt":  TextLoader,
-    ".html": UnstructuredHTMLLoader,
+    ".html": UnstructuredHTMLLoader
 }
 
 def load_document(file_path: str) -> List[Document]:

@@ -1,6 +1,6 @@
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_core.documents import Document 
+from langchain_core.documents import Document
 from typing import List
 from config import (
     EMBEDDING_DEVICE,EMBEDDING_MODEL,
@@ -27,8 +27,12 @@ def embed_document(chunks:List[Document]):
         chunks (List[Document]): List dedocuments langchain
     """
     modele=get_embeddings()
-    vector_store=Chroma.from_documents(chunks,embedding=modele,
-                                       collection_name=COLLECTION_NAME,persist_directory=VECTORSTORE_PATH)
-    
+    vector_store=Chroma.from_documents(
+        documents=chunks,
+        embedding=modele,
+        collection_name=COLLECTION_NAME,
+        persist_directory=VECTORSTORE_PATH
+    )
+
     return vector_store
     

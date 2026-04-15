@@ -1,4 +1,5 @@
 from langchain_chroma import Chroma
+from langchain_core.embeddings import Embeddings
 from app.embedder import get_embeddings
 from config import TOP_K, VECTORSTORE_PATH,COLLECTION_NAME
 

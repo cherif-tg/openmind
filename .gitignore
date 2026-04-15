@@ -34,3 +34,7 @@ venv/
 *.bin
 *.sqlite3
 vectorstore/
+*.env.exemple
+docs/
+documents/
+tests/
