@@ -1,120 +1,72 @@
-"""
-Tests unitaires pour le RAG chain (app/rag_chain.py)
-"""
-import pytest
-from unittest.mock import MagicMock, patch
+"""Tests unitaires pour le pipeline RAG (app/rag_chain.py)."""
 
-from app.rag_chain import build_rag_chain
+from langchain_core.documents import Document
+from langchain_core.runnables import RunnableLambda
+
+from app import rag_chain
+
+
+def _docs():
+    return [
+        Document(
+            page_content="Premier passage",
+            metadata={"filename": "a.txt", "index": 0, "page": 1},
+        ),
+        Document(
+            page_content="Deuxième passage",
+            metadata={"filename": "b.txt", "index": 1, "page": 2},
+        ),
+    ]
+
+
+class TestBuildContext:
+    def test_numbers_chunks(self):
+        context = rag_chain.build_context(_docs())
+        assert "[1] Premier passage" in context
+        assert "[2] Deuxième passage" in context
+
+    def test_empty(self):
+        assert rag_chain.build_context([]) == ""
 
 
 class TestBuildRagChain:
-    """Tests pour la fonction build_rag_chain"""
+    def test_no_documents(self, mocker):
+        mocker.patch("app.rag_chain.get_retriever").return_value.invoke.return_value = []
 
-    def test_build_rag_chain_returns_tuple(self, mocker):
-        """Test que build_rag_chain retourne un tuple (réponse, docs)"""
-        # Mock du LLM
-        mock_llm = mocker.patch("app.llm_factory.get_llm")
-        mock_llm.return_value = mocker.MagicMock()
-        mock_llm.return_value.invoke.return_value = MagicMock(content="Réponse test")
+        answer, docs = rag_chain.build_rag_chain("question", rerank=False)
 
-        # Mock du retriever
-        mock_retriever = mocker.patch("app.retriever.get_retriever")
-        mock_docs = [
-            MagicMock(page_content="Document 1", metadata={"source": "test.pdf"}),
-            MagicMock(page_content="Document 2", metadata={"source": "test.pdf"})
-        ]
-        mock_retriever.return_value.invoke.return_value = mock_docs
+        assert "pas trouvé" in answer
+        assert docs == []
 
-        # Mock de PromptTemplate et StrOutputParser
-        mocker.patch("app.rag_chain.PromptTemplate")
-        mocker.patch("app.rag_chain.StrOutputParser")
+    def test_generates_answer_with_citations(self, mocker):
+        docs = _docs()
+        mocker.patch("app.rag_chain.get_retriever").return_value.invoke.return_value = docs
+        mocker.patch(
+            "app.rag_chain.get_llm",
+            return_value=RunnableLambda(lambda inputs: "Réponse [1] et [2]"),
+        )
 
-        response, docs = build_rag_chain("Question de test")
+        answer, used_docs = rag_chain.build_rag_chain("question", rerank=False)
 
-        assert isinstance(response, str)
-        assert isinstance(docs, list)
-        assert len(docs) > 0
+        assert answer == "Réponse [1] et [2]"
+        assert used_docs == docs
 
-    def test_build_rag_chain_calls_retriever(self, mocker):
-        """Test que build_rag_chain appelle bien le retriever"""
-        mock_llm = mocker.patch("app.llm_factory.get_llm")
-        mock_llm.return_value = mocker.MagicMock()
+    def test_rerank_path(self, mocker):
+        docs = _docs()
+        mocker.patch("app.rag_chain.get_retriever").return_value.invoke.return_value = docs
+        mocker.patch("app.rag_chain.get_llm", return_value=RunnableLambda(lambda inputs: "ok"))
+        rerank_mock = mocker.patch("app.reranker.rerank_documents", return_value=[docs[1], docs[0]])
 
-        mock_retriever = mocker.patch("app.retriever.get_retriever")
-        mock_docs = [MagicMock(page_content="Doc", metadata={})]
-        mock_retriever.return_value.invoke.return_value = mock_docs
+        rag_chain.build_rag_chain("question", top_k=1, rerank=True)
 
-        mocker.patch("app.rag_chain.PromptTemplate")
-        mocker.patch("app.rag_chain.StrOutputParser")
+        rerank_mock.assert_called_once()
 
-        build_rag_chain("Question")
+    def test_rerank_falls_back_on_error(self, mocker):
+        docs = _docs()
+        mocker.patch("app.rag_chain.get_retriever").return_value.invoke.return_value = docs
+        mocker.patch("app.rag_chain.get_llm", return_value=RunnableLambda(lambda inputs: "ok"))
+        mocker.patch("app.reranker.rerank_documents", side_effect=RuntimeError("model absent"))
 
-        # Vérifier que le retriever a été appelé avec la question
-        mock_retriever.return_value.invoke.assert_called_once_with("Question")
+        answer, used_docs = rag_chain.build_rag_chain("question", top_k=1, rerank=True)
 
-    def test_build_rag_chain_calls_llm(self, mocker):
-        """Test que build_rag_chain appelle le LLM"""
-        mock_llm = mocker.patch("app.llm_factory.get_llm")
-        mock_llm_instance = mocker.MagicMock()
-        mock_llm.return_value = mock_llm_instance
-
-        mock_retriever = mocker.patch("app.retriever.get_retriever")
-        mock_docs = [MagicMock(page_content="Contexte de test", metadata={})]
-        mock_retriever.return_value.invoke.return_value = mock_docs
-
-        mocker.patch("app.rag_chain.PromptTemplate")
-        mocker.patch("app.rag_chain.StrOutputParser")
-
-        build_rag_chain("Question")
-
-        # Vérifier que la chaîne a été invoquée
-        assert mock_llm_instance.invoke.called or mock_llm_instance.__or__.called
-
-    def test_build_rag_chain_formats_context(self, mocker):
-        """Test que le contexte est bien formaté"""
-        mock_llm = mocker.patch("app.llm_factory.get_llm")
-        mock_llm.return_value = mocker.MagicMock()
-
-        mock_retriever = mocker.patch("app.retriever.get_retriever")
-        mock_docs = [
-            MagicMock(page_content="Premier document", metadata={}),
-            MagicMock(page_content="Deuxième document", metadata={})
-        ]
-        mock_retriever.return_value.invoke.return_value = mock_docs
-
-        mocker.patch("app.rag_chain.PromptTemplate")
-        mocker.patch("app.rag_chain.StrOutputParser")
-
-        build_rag_chain("Question")
-
-        # Le contexte devrait contenir les deux documents séparés par des newlines
-        mock_retriever.return_value.invoke.assert_called_once()
-
-
-class TestRagChainIntegration:
-    """Tests d'intégration pour le RAG chain"""
-
-    @pytest.mark.skip(reason="Nécessite un LLM configuré")
-    def test_build_rag_chain_real_llm(self):
-        """Test réel avec un vrai LLM (skip par défaut)"""
-        # Ce test nécessite une clé API valide
-        response, docs = build_rag_chain("Qu'est-ce que le RAG?")
-
-        assert isinstance(response, str)
-        assert len(response) > 0
-        assert isinstance(docs, list)
-
-    def test_build_rag_chain_empty_results(self, mocker):
-        """Test quand le retriever ne trouve aucun document"""
-        mock_llm = mocker.patch("app.llm_factory.get_llm")
-        mock_llm.return_value = mocker.MagicMock()
-
-        mock_retriever = mocker.patch("app.retriever.get_retriever")
-        mock_retriever.return_value.invoke.return_value = []  # Aucun résultat
-
-        mocker.patch("app.rag_chain.PromptTemplate")
-        mocker.patch("app.rag_chain.StrOutputParser")
-
-        # Gérer le cas où le contexte est vide
-        with pytest.raises(Exception):
-            build_rag_chain("Question sans résultats")
+        assert len(used_docs) == 1

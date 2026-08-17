@@ -1,0 +1,42 @@
+# Core RAG (compatible Python 3.11+)
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-community>=0.3.0
+langchain-openai>=0.2.0
+langchain-chroma>=0.1.0
+langchain-groq>=0.2.0
+langchain-huggingface>=0.1.0
+
+# Document loaders
+pypdf>=4.3.0
+python-docx>=1.1.0
+unstructured>=0.15.0
+
+# Embeddings + re-ranking (sentence-transformers fournit le cross-encoder)
+sentence-transformers>=3.0.0
+huggingface-hub>=0.24.0
+
+# Vector store
+chromadb>=0.4.0
+
+# Interface
+streamlit>=1.38.0
+
+# Evaluation (optionnel — nécessite Visual C++ Build Tools sur Windows)
+# ragas>=0.1.20
+
+# Utilitaires
+python-dotenv>=1.0.0
+pandas>=2.2.0
+tqdm>=4.66.0
+
+# API Backend
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.6
+httpx>=0.27.0
+
+# Tests
+pytest>=8.0.0
+pytest-mock>=3.12.0
+pytest-asyncio>=0.23.0

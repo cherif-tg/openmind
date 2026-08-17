@@ -1,40 +1,42 @@
-#text files
-*.txt
-#log files
-*.log
-#csv files
-*.csv
-#json files
-*.json
-#xml files
-*.xml
-#yaml files
-*.yaml
-#ini files
-*.ini
-#env files
-*.env
-#backup files
-*.bak
-#temporary files
-*.tmp
-#cache files
-*.cache
-#compiled files
-*.pyc
-*.class
-#virtual environment
+# --- Environnement virtuel ---
 venv/
-#database files
-*.db
-#pdf file
-*.pdf
+.venv/
+env/
+ENV/
 
-#vectore file
-*.bin
-*.sqlite3
+# --- Bytecode / caches Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Secrets (ne jamais versionner) ---
+.env
+.env.local
+
+# --- Vector store et donnees generees ---
 vectorstore/
-*.env.exemple
-docs/
+*.sqlite3
+*.bin
+
+# --- Documents sources et donnees uploadées (données, pas du code) ---
 documents/
-tests/
+data/
+
+# --- IDE / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
+
+# --- Build / distribution ---
+build/
+dist/

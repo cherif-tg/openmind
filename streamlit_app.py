@@ -67,8 +67,10 @@ def get_api_documents():
         response = httpx.get(f"{API_BASE_URL}/api/documents/", timeout=10.0)
         if response.status_code == 200:
             return response.json()
+        print(f"Erreur API documents: {response.status_code} - {response.text}")
         return None
-    except Exception:
+    except Exception as e:
+        print(f"Erreur lors de la récupération des documents: {e}")
         return None
 
 
@@ -88,9 +90,12 @@ def upload_documents(files):
 
         if response.status_code == 200:
             return response.json()
-        return None
+        else:
+            error_detail = response.text
+            st.error(f"Erreur serveur ({response.status_code}): {error_detail}")
+            return None
     except Exception as e:
-        st.error(f"Erreur lors de l'upload : {e}")
+        st.error(f"Erreur lors de l'upload: {e}")
         return None
 
 
@@ -142,6 +147,7 @@ def format_sources(sources_data):
     for source in sources_data:
         formatted.append({
             "file": source.get("metadata", {}).get("source", "unknown"),
+            "page": source.get("metadata", {}).get("page"),
             "chunk": source.get("metadata", {}).get("chunk", 0),
             "content": source.get("content", "")[:200]
         })
@@ -187,9 +193,9 @@ with st.sidebar:
 
     uploaded_files = st.file_uploader(
         "Uploader des documents",
-        type=["pdf", "csv", "docx", "txt", "html"],
+        type=["pdf", "csv", "docx", "txt", "md", "html"],
         accept_multiple_files=True,
-        help="Formats supportés: PDF, CSV, DOCX, TXT, HTML"
+        help="Formats supportés: PDF, CSV, DOCX, TXT, Markdown, HTML"
     )
 
     if uploaded_files:
@@ -253,9 +259,11 @@ with st.sidebar:
     status_text = "Prêt" if st.session_state.vectorstore_loaded else "Non chargé"
     st.markdown(f"{status_color} {status_text}")
 
-    if st.session_state.vectorstore_loaded and docs_data:
-        total_chunks = sum(doc["chunks_count"] for doc in docs_data.get("documents", []))
-        st.markdown(f"**Total chunks:** {total_chunks}")
+    if st.session_state.vectorstore_loaded:
+        docs_data = get_api_documents()
+        if docs_data and docs_data.get("documents"):
+            total_chunks = sum(doc["chunks_count"] for doc in docs_data.get("documents", []))
+            st.markdown(f"**Total chunks:** {total_chunks}")
 
 # ── Main ──────────────────────────────────────────────────────
 st.title(" Assistant de Recherche")
@@ -273,7 +281,7 @@ else:
             if "sources" in message and message["sources"]:
                 with st.expander("Voir les sources"):
                     for source in message["sources"]:
-                        st.markdown(f"** {source['file']}** (chunk {source['chunk']})")
+                        st.markdown(f"** {source['file']}** (page {source.get('page', '?')}, chunk {source['chunk']})")
                         st.markdown(f"_{source['content']}..._")
                         st.markdown("---")
 
@@ -302,7 +310,7 @@ else:
                     if response_data.get("sources"):
                         with st.expander(" Voir les sources"):
                             for source in response_data["sources"]:
-                                st.markdown(f"** {source['metadata'].get('source', 'unknown')}** (chunk {source['metadata'].get('chunk', 0)})")
+                                st.markdown(f"** {source['metadata'].get('source', 'unknown')}** (page {source['metadata'].get('page', '?')}, chunk {source['metadata'].get('chunk', 0)})")
                                 st.markdown(f"_{source['content']}..._")
                                 st.markdown("---")
 

@@ -77,9 +77,8 @@ class TestEmbedDocument:
 
         try:
             # ChromaDB devrait gérer une liste vide
-            vs = embed_document([])
-
-            assert vs is not None
+            with pytest.raises(ValueError, match="Aucun chunk"):
+                embed_document([])
         finally:
             embedder_module.VECTORSTORE_PATH = original_path
 

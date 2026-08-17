@@ -1,38 +1,46 @@
-from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_core.documents import Document
+"""Vectorisation des chunks et stockage dans ChromaDB."""
+
 from typing import List
+
+from langchain_chroma import Chroma
+from langchain_core.documents import Document
+from langchain_huggingface import HuggingFaceEmbeddings
+
 from config import (
-    EMBEDDING_DEVICE,EMBEDDING_MODEL,
-    VECTORSTORE_PATH,COLLECTION_NAME)
-from dotenv import load_dotenv
-load_dotenv()
+    COLLECTION_NAME,
+    EMBEDDING_DEVICE,
+    EMBEDDING_MODEL,
+    VECTORSTORE_PATH,
+)
 
-def get_embeddings():
-    """retourne le modele d'embeddings courant
 
-    Returns:
-        _type_: modele d'embedding huggingface
-    """
-    modele=HuggingFaceEmbeddings(
+def get_embeddings() -> HuggingFaceEmbeddings:
+    """Retourne le modèle d'embeddings HuggingFace configuré."""
+    return HuggingFaceEmbeddings(
         model_name=EMBEDDING_MODEL,
-        model_kwargs={'device':EMBEDDING_DEVICE}
+        model_kwargs={"device": EMBEDDING_DEVICE},
     )
-    return modele
 
-def embed_document(chunks:List[Document]):
-    """Prend un list de chunk langchain et retourne les vecteurs stockées dans un vectorstore
+
+def embed_document(chunks: List[Document]) -> Chroma:
+    """Vectorise une liste de chunks et les stocke dans le vector store.
 
     Args:
-        chunks (List[Document]): List dedocuments langchain
-    """
-    modele=get_embeddings()
-    vector_store=Chroma.from_documents(
-        documents=chunks,
-        embedding=modele,
-        collection_name=COLLECTION_NAME,
-        persist_directory=VECTORSTORE_PATH
-    )
+        chunks: documents LangChain à indexer.
 
+    Raises:
+        ValueError: si ``chunks`` est vide.
+
+    Returns:
+        Le vector store Chroma persistant.
+    """
+    if not chunks:
+        raise ValueError("Aucun chunk à indexer.")
+
+    vector_store = Chroma.from_documents(
+        documents=chunks,
+        embedding=get_embeddings(),
+        collection_name=COLLECTION_NAME,
+        persist_directory=VECTORSTORE_PATH,
+    )
     return vector_store
-    
