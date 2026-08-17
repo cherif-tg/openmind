@@ -1,7 +1,7 @@
 """Pipeline RAG complet : retrieval -> re-ranking -> génération avec citations.
 
-Ce module est la source de vérité du prompt RAG : l'API et l'interface
-passent par ici, ce qui évite toute duplication.
+Ce module est la source de vérité du prompt RAG : l'API, l'interface et la
+démo passent par ici, ce qui évite toute duplication.
 """
 
 from typing import List, Optional, Tuple
@@ -50,6 +50,7 @@ def build_rag_chain(
     top_k: int = TOP_K,
     llm_mode: Optional[str] = None,
     rerank: Optional[bool] = None,
+    retriever=None,
 ) -> Tuple[str, List[Document]]:
     """Exécute le pipeline RAG complet.
 
@@ -58,6 +59,7 @@ def build_rag_chain(
         top_k: nombre de chunks finaux utilisés pour la génération.
         llm_mode: mode LLM ("groq", "ollama", "huggingface"). Défaut : config.
         rerank: active/désactive le re-ranking. Défaut : valeur de config.
+        retriever: retriever optionnel (défaut : construit depuis le vector store).
 
     Returns:
         Tuple ``(réponse, documents utilisés)``. Les documents sont numérotés
@@ -70,7 +72,9 @@ def build_rag_chain(
     # laisser de la marge au cross-encoder avant de tronquer à top_k.
     fetch_k = RETRIEVAL_K if rerank else top_k
 
-    retriever = get_retriever(top_k=fetch_k)
+    if retriever is None:
+        retriever = get_retriever(top_k=fetch_k)
+
     documents = retriever.invoke(question)
 
     if not documents:

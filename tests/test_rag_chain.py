@@ -70,3 +70,17 @@ class TestBuildRagChain:
         answer, used_docs = rag_chain.build_rag_chain("question", top_k=1, rerank=True)
 
         assert len(used_docs) == 1
+
+    def test_accepts_custom_retriever(self, mocker):
+        docs = _docs()
+        mock_retriever = mocker.MagicMock()
+        mock_retriever.invoke.return_value = docs
+        mocker.patch("app.rag_chain.get_llm", return_value=RunnableLambda(lambda inputs: "ok"))
+        get_retriever_mock = mocker.patch("app.rag_chain.get_retriever")
+
+        answer, used_docs = rag_chain.build_rag_chain(
+            "question", rerank=False, retriever=mock_retriever
+        )
+
+        assert used_docs == docs
+        get_retriever_mock.assert_not_called()
