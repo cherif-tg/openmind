@@ -43,7 +43,7 @@ FastAPI et une interface Streamlit.
 ## Structure du projet
 
 ```
-openmind-rag/
+openmind/
 ├── app/                   # Cœur du système RAG
 │   ├── ingestion.py       # Chargement des documents (PDF, MD, TXT, …)
 │   ├── chunker.py         # Découpage en chunks
@@ -75,8 +75,8 @@ générées ou fournies par l'utilisateur : ils ne sont pas versionnés.
 Prérequis : Python 3.11+, pip. (Ollama est optionnel, pour le mode local.)
 
 ```bash
-git clone https://github.com/ton-username/openmind-rag.git
-cd openmind-rag
+git clone https://github.com/cherif-tg/openmind.git
+cd openmind
 
 python -m venv venv
 # Windows

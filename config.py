@@ -10,7 +10,7 @@ LLM_MODE = os.getenv("LLM_MODE", "groq")
 
 # ======================= Groq (production) =================
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-GROQ_MODEL = "llama-3.1-70b-versatile"  # rapide + gratuit
+GROQ_MODEL = "llama-3.3-70b-versatile"  # rapide + gratuit
 GROQ_MODEL_LIGHT = "llama-3.1-8b-instant"  # encore plus rapide
 
 # ======================= Ollama (local) ====================
