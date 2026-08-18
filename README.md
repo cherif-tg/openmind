@@ -1,8 +1,8 @@
 ---
 title: OpenMind RAG
 emoji: 🧠
-colorFrom: "#0ea5e9"
-colorTo: "#6366f1"
+colorFrom: blue
+colorTo: indigo
 sdk: gradio
 app_file: app.py
 pinned: false
