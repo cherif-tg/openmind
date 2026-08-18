@@ -83,7 +83,10 @@ def answer(question: str, top_k: int, rerank: bool, history):
         answer_text = f"Erreur lors de la génération : {e}"
         sources = "-"
 
-    history.append((question, answer_text))
+    history = history + [
+        {"role": "user", "content": question},
+        {"role": "assistant", "content": answer_text},
+    ]
     return history, sources
 
 
@@ -102,7 +105,7 @@ with gr.Blocks(title="OpenMind RAG - Démo") as demo:
         "La réponse cite ses sources sous la forme `[1]`, `[2]`, …"
     )
 
-    chatbot = gr.Chatbot(label="Conversation", height=420)
+    chatbot = gr.Chatbot(label="Conversation", height=420, type="messages")
 
     with gr.Row():
         question = gr.Textbox(
