@@ -19,7 +19,7 @@ from langchain_core.documents import Document
 from app.chunker import chunk_documents
 from app.embedder import get_embeddings
 from app.rag_chain import build_rag_chain
-from config import COLLECTION_NAME, RETRIEVAL_K, TOP_K
+from config import COLLECTION_NAME, GROQ_MODEL, RETRIEVAL_K, TOP_K
 
 DEMO_CORPUS_DIR = "demo_corpus"
 
@@ -127,7 +127,7 @@ with gr.Blocks(title="OpenMind RAG - Démo") as demo:
     submit.click(answer, [question, top_k, rerank, chatbot], [chatbot, sources])
     question.submit(answer, [question, top_k, rerank, chatbot], [chatbot, sources])
 
-    gr.Markdown("LLM : Groq (`llama-3.3-70b-versatile`). Clé via le secret `GROQ_API_KEY`.")
+    gr.Markdown(f"LLM : Groq (`{GROQ_MODEL}`). Clé via le secret `GROQ_API_KEY`.")
 
 
 if __name__ == "__main__":
