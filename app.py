@@ -1,14 +1,18 @@
-"""Démo Gradio monoprocess OpenMind RAG — prête pour Hugging Face Spaces.
+"""Démo Gradio monoprocess OpenMind RAG - prête pour Hugging Face Spaces.
 
 Le pipeline RAG tourne entièrement dans ce processus (pas de serveur
 FastAPI séparé). Le corpus de démonstration est indexé en mémoire au premier
 appel, puis les questions sont traitées via retrieval + re-ranking +
 génération avec citations.
+
+Compatible ZeroGPU (Hugging Face Spaces) : la fonction d'inférence est
+décorée avec `@spaces.GPU`.
 """
 
 from pathlib import Path
 
 import gradio as gr
+import spaces
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
 
@@ -59,6 +63,7 @@ def _format_sources(documents) -> str:
     return "\n\n---\n\n".join(blocks)
 
 
+@spaces.GPU(duration=120)
 def answer(question: str, top_k: int, rerank: bool, history):
     """Répond à une question et met à jour l'historique de conversation."""
     history = history or []
@@ -76,14 +81,22 @@ def answer(question: str, top_k: int, rerank: bool, history):
         sources = _format_sources(docs)
     except Exception as e:  # noqa: BLE001
         answer_text = f"Erreur lors de la génération : {e}"
-        sources = "—"
+        sources = "-"
 
     history.append((question, answer_text))
     return history, sources
 
 
-with gr.Blocks(title="OpenMind RAG — Démo") as demo:
-    gr.Markdown("# 🧠 OpenMind RAG — Démo")
+# Pré-chargement du corpus au démarrage : évite de télécharger les modèles
+# pendant le premier appel (soumis à la limite de temps de ZeroGPU).
+try:
+    _get_retriever()
+except Exception as e:  # noqa: BLE001
+    print(f"Pré-chargement différé (sera retenté au premier appel) : {e}")
+
+
+with gr.Blocks(title="OpenMind RAG - Démo") as demo:
+    gr.Markdown("# 🧠 OpenMind RAG - Démo")
     gr.Markdown(
         "Posez une question sur le corpus de démo (RAG, embeddings, re-ranking). "
         "La réponse cite ses sources sous la forme `[1]`, `[2]`, …"
