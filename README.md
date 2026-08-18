@@ -19,6 +19,22 @@ FastAPI, une interface Streamlit et une **démo live Gradio**.
 
 ---
 
+## Démo live (Hugging Face Spaces)
+
+👉 **Essayer la démo en ligne : <https://cheriftenga-rag.hf.space>**
+
+Une démo interroge un petit corpus de démonstration (`demo_corpus/`) via le
+fichier `app.py` (Gradio). Pour la redéployer :
+
+1. Créez un Space sur <https://huggingface.co> avec le SDK **Gradio**.
+2. Liez-le à ce dépôt (ou poussez la branche `main` vers l'espace).
+3. Ajoutez le secret **`GROQ_API_KEY`** dans *Settings → Variables and secrets*.
+
+Au premier appel, les modèles d'embeddings et de re-ranking sont téléchargés
+(~200 Mo), puis mis en cache. Le premier chargement peut donc être lent.
+
+---
+
 ## Fonctionnalités
 
 - **Ingestion multi-format** : PDF, CSV, DOCX, TXT, **Markdown**, HTML, Web
@@ -31,22 +47,8 @@ FastAPI, une interface Streamlit et une **démo live Gradio**.
 - **LLM hybride** : Groq (production) / Ollama (local) / HuggingFace (local)
 - **API REST** : FastAPI (upload, liste, suppression, requête)
 - **Interface** : Streamlit conversationnelle
-- **Démo live** : Gradio (prête pour Hugging Face Spaces)
+- **Démo live** : Gradio (Hugging Face Spaces)
 - **Tests** : suite pytest
-
----
-
-## Démo live (Hugging Face Spaces)
-
-Une démo interroge un petit corpus de démonstration (`demo_corpus/`) via le
-fichier `app.py` (Gradio). Pour la déployer :
-
-1. Créez un Space sur <https://huggingface.co> avec le SDK **Gradio**.
-2. Liez-le à ce dépôt (ou poussez la branche `main` vers l'espace).
-3. Ajoutez le secret **`GROQ_API_KEY`** dans *Settings → Variables and secrets*.
-
-Au premier appel, les modèles d'embeddings et de re-ranking sont téléchargés
-(~200 Mo), puis mis en cache. Le premier chargement peut donc être lent.
 
 ---
 
@@ -61,7 +63,7 @@ Au premier appel, les modèles d'embeddings et de re-ranking sont téléchargés
 | Embeddings      | sentence-transformers (HuggingFace)            |
 | Re-ranking      | sentence-transformers (cross-encoder)          |
 | Vector store    | ChromaDB                                       |
-| LLM production  | Groq API (`openai/gpt-oss-120b`)           |
+| LLM production  | Groq API (`openai/gpt-oss-120b`)               |
 | LLM local       | Ollama / HuggingFace                           |
 
 ---
@@ -133,10 +135,18 @@ Copiez `.env.example` vers `.env` et renseignez :
 LLM_MODE=groq
 GROQ_API_KEY=***
 
+# Modèle Groq (configurable — Groq déprécie régulièrement ses modèles)
+GROQ_MODEL=openai/gpt-oss-120b
+
 # Re-ranking (true/false)
 RERANK_ENABLED=true
 RERANK_MODEL=cross-encoder/ms-marco-MiniLM-L-6-v2
 ```
+
+> ℹ️ Le modèle Groq est configurable via la variable `GROQ_MODEL` (dans `.env`
+> en local, ou comme secret `GROQ_MODEL` sur Hugging Face Spaces), sans toucher
+> au code. Si `openai/gpt-oss-120b` devient indisponible, remplacez simplement
+> la valeur.
 
 ---
 
