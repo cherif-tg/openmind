@@ -18,7 +18,7 @@ def get_reranker():
     if _reranker is None:
         from sentence_transformers import CrossEncoder
 
-        _reranker = CrossEncoder(RERANK_MODEL)
+        _reranker = CrossEncoder(RERANK_MODEL, device="cpu")
     return _reranker
 
 

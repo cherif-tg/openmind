@@ -94,6 +94,9 @@ def answer(question: str, top_k: int, rerank: bool, history):
 # pendant le premier appel (soumis à la limite de temps de ZeroGPU).
 try:
     _get_retriever()
+    from app.reranker import get_reranker
+
+    get_reranker()
 except Exception as e:  # noqa: BLE001
     print(f"Pré-chargement différé (sera retenté au premier appel) : {e}")
 
