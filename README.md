@@ -61,7 +61,7 @@ Au premier appel, les modèles d'embeddings et de re-ranking sont téléchargés
 | Embeddings      | sentence-transformers (HuggingFace)            |
 | Re-ranking      | sentence-transformers (cross-encoder)          |
 | Vector store    | ChromaDB                                       |
-| LLM production  | Groq API (`meta-llama/llama-4-scout-17b-16e-instruct`)           |
+| LLM production  | Groq API (`openai/gpt-oss-120b`)           |
 | LLM local       | Ollama / HuggingFace                           |
 
 ---

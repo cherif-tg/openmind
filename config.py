@@ -10,8 +10,8 @@ LLM_MODE = os.getenv("LLM_MODE", "groq")
 
 # ======================= Groq (production) =================
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-GROQ_MODEL = os.getenv("GROQ_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct")  # rapide + gratuit
-GROQ_MODEL_LIGHT = os.getenv("GROQ_MODEL_LIGHT", "meta-llama/llama-4-scout-17b-16e-instruct")  # encore plus rapide
+GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")  # rapide + gratuit
+GROQ_MODEL_LIGHT = os.getenv("GROQ_MODEL_LIGHT", "openai/gpt-oss-120b")  # encore plus rapide
 
 # ======================= Ollama (local) ====================
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
