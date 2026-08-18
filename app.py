@@ -105,7 +105,7 @@ with gr.Blocks(title="OpenMind RAG - Démo") as demo:
         "La réponse cite ses sources sous la forme `[1]`, `[2]`, …"
     )
 
-    chatbot = gr.Chatbot(label="Conversation", height=420, type="messages")
+    chatbot = gr.Chatbot(label="Conversation", height=420)
 
     with gr.Row():
         question = gr.Textbox(
