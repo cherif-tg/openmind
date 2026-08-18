@@ -5,7 +5,7 @@
 Système de **Retrieval-Augmented Generation (RAG)** complet : ingestion de
 documents, découpage, vectorisation, recherche sémantique, **re-ranking** et
 génération de réponses **avec citations des sources**. Livré avec une API
-FastAPI et une interface Streamlit.
+FastAPI, une interface Streamlit et une **démo live Gradio**.
 
 ---
 
@@ -21,7 +21,22 @@ FastAPI et une interface Streamlit.
 - **LLM hybride** : Groq (production) / Ollama (local) / HuggingFace (local)
 - **API REST** : FastAPI (upload, liste, suppression, requête)
 - **Interface** : Streamlit conversationnelle
+- **Démo live** : Gradio (prête pour Hugging Face Spaces)
 - **Tests** : suite pytest
+
+---
+
+## Démo live (Hugging Face Spaces)
+
+Une démo interroge un petit corpus de démonstration (`demo_corpus/`) via le
+fichier `app.py` (Gradio). Pour la déployer :
+
+1. Créez un Space sur <https://huggingface.co> avec le SDK **Gradio**.
+2. Liez-le à ce dépôt (ou poussez la branche `main` vers l'espace).
+3. Ajoutez le secret **`GROQ_API_KEY`** dans *Settings → Variables and secrets*.
+
+Au premier appel, les modèles d'embeddings et de re-ranking sont téléchargés
+(~200 Mo), puis mis en cache. Le premier chargement peut donc être lent.
 
 ---
 
@@ -31,11 +46,12 @@ FastAPI et une interface Streamlit.
 |-----------------|------------------------------------------------|
 | Framework RAG   | LangChain                                      |
 | Interface       | Streamlit                                      |
+| Démo            | Gradio                                         |
 | API             | FastAPI + Uvicorn                              |
 | Embeddings      | sentence-transformers (HuggingFace)            |
 | Re-ranking      | sentence-transformers (cross-encoder)          |
 | Vector store    | ChromaDB                                       |
-| LLM production  | Groq API (`llama-3.1-70b-versatile`)           |
+| LLM production  | Groq API (`llama-3.3-70b-versatile`)           |
 | LLM local       | Ollama / HuggingFace                           |
 
 ---
@@ -59,9 +75,12 @@ openmind/
 ├── scripts/
 │   └── ingest.py          # Ingestion d'un dossier en ligne de commande
 ├── tests/                 # Suite pytest
-├── streamlit_app.py       # Interface web
+├── demo_corpus/           # Corpus de démonstration (Markdown)
+├── app.py                 # Démo Gradio (Hugging Face Spaces)
+├── streamlit_app.py       # Interface Streamlit (application complète)
 ├── config.py              # Configuration centralisée
-├── requirements.txt
+├── requirements.txt       # Dépendances de base (démo + cœur RAG)
+├── requirements-full.txt  # Dépendances complètes (API, Streamlit, tests)
 └── .env.example
 ```
 
@@ -84,7 +103,11 @@ venv\Scripts\activate
 # Linux / macOS
 source venv/bin/activate
 
+# Démo seule (Gradio)
 pip install -r requirements.txt
+
+# Application complète (API + Streamlit + loaders + tests)
+pip install -r requirements-full.txt
 
 cp .env.example .env   # puis renseigner les clés
 ```
@@ -98,7 +121,7 @@ Copiez `.env.example` vers `.env` et renseignez :
 ```env
 # Mode LLM : groq | ollama | huggingface
 LLM_MODE=groq
-GROQ_API_KEY=votre_cle
+GROQ_API_KEY=***
 
 # Re-ranking (true/false)
 RERANK_ENABLED=true
@@ -109,13 +132,19 @@ RERANK_MODEL=cross-encoder/ms-marco-MiniLM-L-6-v2
 
 ## Lancement
 
-### 1. Ingestion des documents (CLI)
+### 1. Démo Gradio (monoprocess)
+
+```bash
+python app.py
+```
+
+### 2. Ingestion des documents (CLI)
 
 ```bash
 python scripts/ingest.py documents/
 ```
 
-### 2. API FastAPI
+### 3. API FastAPI
 
 ```bash
 uvicorn api.main:app --reload --port 8000
@@ -123,7 +152,7 @@ uvicorn api.main:app --reload --port 8000
 
 Docs interactives : <http://localhost:8000/docs>
 
-### 3. Interface Streamlit
+### 4. Interface Streamlit
 
 ```bash
 streamlit run streamlit_app.py --server.port 8501
@@ -166,7 +195,7 @@ Réponse (extrait) :
 ## Mode local avec Ollama
 
 ```bash
-ollama pull llama3.2
+ollama pull gemma4:e4b
 # puis définir LLM_MODE=ollama dans .env
 ```
 
@@ -187,9 +216,9 @@ Les tests unitaires sont isolés (mocks) ; certains tests d'intégration
 
 - [ ] Évaluation automatique de la qualité (RAGAS)
 - [ ] Import d'URL exposé dans l'API et l'interface
+- [ ] Upload de documents dans la démo Gradio
 - [ ] Authentification utilisateurs
 - [ ] Support multimodal (images)
-- [ ] Déploiement Docker
 
 ---
 
