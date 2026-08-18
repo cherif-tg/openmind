@@ -1,3 +1,13 @@
+---
+title: OpenMind RAG
+emoji: 🧠
+colorFrom: "#0ea5e9"
+colorTo: "#6366f1"
+sdk: gradio
+app_file: app.py
+pinned: false
+---
+
 # OpenMind RAG
 
 > *Open your documents. Unlock your knowledge.*
